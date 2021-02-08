@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 1997, 2016 IBM Corporation and others.
+ * Copyright (c) 1997, 2021 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -599,7 +599,7 @@ public final class FreePool implements JCAPMIHelper {
             if (hashCode == mcWrapperTemp1.getSubjectCRIHashCode()) {
                 if (((com.ibm.ejs.j2c.MCWrapper) mcWrapperTemp1).do_not_reuse_mcw) {
                     if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled()) {
-                        Tr.debug(this, tc, "Connection error occurred for this mcw " + mcWrapperTemp1 + ", mcw will not be reuse");
+                        Tr.debug(this, tc, "Connection error occurred for this mcw " + mcWrapperTemp1 + ", mcw will not be reused");
                     }
                     synchronized (pm.waiterFreePoolLock) {
                         cleanupAndDestroyMCWrapper(mcWrapperTemp1);
@@ -626,9 +626,8 @@ public final class FreePool implements JCAPMIHelper {
                  */
                 synchronized (pm.waiterFreePoolLock) {
                     synchronized (freeConnectionLockObject) {
-                        // We need to look through the list, since we didn't find a matching connection at
-                        // the end of the list, we need to use get and only remove if we find a matching
-                        // connection.
+                        // We need to look through the list, since we didn't find a matching connection at the
+                        // end of the list, we need to use get and only remove if we find a matching connection.
                         mcwlSize = mcWrapperList.size();
                         if (mcwlSize > 0) { // set this to 0 since mcWrappterTemp1 has already been removed.
 
@@ -640,7 +639,7 @@ public final class FreePool implements JCAPMIHelper {
                                     mcWrapper = getMCWrapperFromMatch(subject, cri, managedConnectionFactory, mcWrapperTemp2);
                                     if (((com.ibm.ejs.j2c.MCWrapper) mcWrapperTemp2).do_not_reuse_mcw) {
                                         if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled()) {
-                                            Tr.debug(this, tc, "Connection error occurred for this mcw " + mcWrapperTemp2 + ", mcw will not be reuse");
+                                            Tr.debug(this, tc, "Connection error occurred for this mcw " + mcWrapperTemp2 + ", mcw will not be reused");
                                         }
                                         mcWrapperList.remove(i);
                                         cleanupAndDestroyMCWrapper(mcWrapperTemp2);
@@ -653,16 +652,14 @@ public final class FreePool implements JCAPMIHelper {
                                         }
                                     }
                                 }
+
                                 if (mcWrapper != null) {
                                     mcWrapperList.remove(i);
                                     mcWrapper.setPoolState(0);
                                     break;
                                 }
-
-                            }
-
+                            } // for (int i = mcwlIndex; i >= 0; --i)
                         } // end if mcwlSize > 1
-
                     } // end synchronized (freeConnectionLockObject)
 
                     /*
@@ -672,20 +669,32 @@ public final class FreePool implements JCAPMIHelper {
                         //synchronized (pm.waiterFreePoolLock) {
                         // waiter code
                         if ((pm.waiterCount > 0) && (pm.waiterCount > pm.mcWrapperWaiterList.size())) {
-
                             // there are requests waiting, so notify one of them
                             pm.mcWrapperWaiterList.add(mcWrapperTemp1);
                             pm.waiterFreePoolLock.notify();
                         } else {
-
                             synchronized (freeConnectionLockObject) {
                                 mcWrapperList.add(mcWrapperTemp1); // Add to end of list
                                 mcWrapperTemp1.setPoolState(1);
                             }
-
                         }
                         //} // end synchronized (waiterFreePoolLock)
-                    } // end synchronized (waiterFreePoolLock)
+                    } else {
+                        // Cleanup mcWrapperTemp1 since it was removed from the free pool already, but not a match
+                        if (((com.ibm.ejs.j2c.MCWrapper) mcWrapperTemp1).errorDuringExternalCall) {
+                            if (com.ibm.ejs.ras.TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled()) {
+                                Tr.debug(tc, "Connection error occurred for this mcw " + mcWrapperTemp1 + ", mcw will not be reused");
+                            }
+                            cleanupAndDestroyMCWrapper(mcWrapperTemp1);
+                            synchronized (freeConnectionLockObject) {
+                                --numberOfConnectionsAssignedToThisFreePool;
+                            }
+                            pm.totalConnectionCount.decrementAndGet();
+                            if ((pm.waiterCount > 0) && (pm.waiterCount > pm.mcWrapperWaiterList.size())) {
+                                pm.waiterFreePoolLock.notify();
+                            }
+                        }
+                    }
 
                     if ((isTracingEnabled && tc.isDebugEnabled())) {
                         if (mcWrapper != null) {
@@ -818,7 +827,7 @@ public final class FreePool implements JCAPMIHelper {
                                              * Connection error event did occur, the mcw was removed.
                                              */
                                             if (TraceComponent.isAnyTracingEnabled() && tc.isDebugEnabled()) {
-                                                Tr.debug(this, tc, "Connection error occurred for this mcw " + mcWrapperTemp + ", mcw will not be reuse");
+                                                Tr.debug(this, tc, "Connection error occurred for this mcw " + mcWrapperTemp + ", mcw will not be reused");
                                             }
 
                                         }

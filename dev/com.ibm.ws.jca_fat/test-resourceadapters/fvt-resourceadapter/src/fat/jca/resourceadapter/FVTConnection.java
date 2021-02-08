@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012,2020 IBM Corporation and others.
+ * Copyright (c) 2012,2021 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,8 +54,6 @@ public class FVTConnection implements Connection {
 
     @Override
     public Session createSession(boolean transacted, int acknowledgeMode) throws JMSException {
-        if (mc == null)
-            throw new javax.jms.IllegalStateException("JMS connection is closed.");
         return new FVTSession(this);
     }
 
@@ -86,11 +84,17 @@ public class FVTConnection implements Connection {
 
     @Override
     public void start() throws JMSException {
-        if (mc == null)
-            throw new javax.jms.IllegalStateException("JMS connection is closed.");
     }
 
     @Override
     public void stop() throws JMSException {
+    }
+
+    public FVTManagedConnection getManagedConnection() {
+        return mc;
+    }
+
+    public void invalidate() {
+        mc.invalid = true;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011,2020 IBM Corporation and others.
+ * Copyright (c) 2011,2021 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -413,6 +413,7 @@ public class DependantApplicationTest extends FATServletClient {
     public void testUpdateConnectionManager() throws Exception {
         Log.entering(getClass(), "testUpdateConnectionManager");
 
+        Log.info(getClass(), "testUpdateConnectionManager", "GJW01FEB2021 was here in the DependantApplicationTest!");
         runTest("testMaxPoolSize2");
 
         // Update a nested connectionManager
@@ -561,5 +562,17 @@ public class DependantApplicationTest extends FATServletClient {
 
         cleanUpExprs = EMPTY_EXPR_LIST;
         Log.exiting(getClass(), "testUpdateContextService");
+    }
+
+    /**
+     * Run the testNonOptimalFreePoolInvalidConnectionCleanup test to make sure invalid connections are getting cleaned up properly
+     * when they go through the non-optimal free pool check
+     *
+     * @throws Exception if the test fails.
+     */
+//    @AllowedFFDC("com.ibm.websphere.ce.j2c.ConnectionWaitTimeoutException") // test case intentionally runs out of connections to test pool size
+    @Test
+    public void testNonOptimalFreePoolInvalidConnectionCleanup() throws Exception {
+        runTest("testNonOptimalFreePoolInvalidConnectionCleanup");
     }
 }

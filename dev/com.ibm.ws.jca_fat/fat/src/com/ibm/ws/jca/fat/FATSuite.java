@@ -15,14 +15,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import com.ibm.ws.jca.fat.app.ConnectionManagerMBeanTest;
 import com.ibm.ws.jca.fat.app.DependantApplicationTest;
-import com.ibm.ws.jca.fat.app.JCATest;
-import com.ibm.ws.jca.fat.regr.InboundSecurityTest;
-import com.ibm.ws.jca.fat.regr.InboundSecurityTestRapid;
 
 import componenttest.rules.repeater.EmptyAction;
-import componenttest.rules.repeater.FeatureReplacementAction;
 import componenttest.rules.repeater.JakartaEE9Action;
 import componenttest.rules.repeater.RepeatTests;
 import componenttest.topology.impl.LibertyServer;
@@ -30,11 +25,11 @@ import componenttest.topology.impl.LibertyServerFactory;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-                DependantApplicationTest.class,
-                JCATest.class,
-                ConnectionManagerMBeanTest.class,
-                InboundSecurityTest.class,
-                InboundSecurityTestRapid.class
+                DependantApplicationTest.class
+//                JCATest.class,
+//                ConnectionManagerMBeanTest.class,
+//                InboundSecurityTest.class,
+//                InboundSecurityTestRapid.class
 })
 public class FATSuite {
 
@@ -45,10 +40,10 @@ public class FATSuite {
      * EE7 and EE8 will run with full fat only. EE9 will be run with lite and full fat.
      */
     @ClassRule
-    public static RepeatTests r = RepeatTests.with(new EmptyAction().fullFATOnly())
-                    .andWith(FeatureReplacementAction.EE8_FEATURES().fullFATOnly())
-                    .andWith(FeatureReplacementAction.EE9_FEATURES());
-
+//    public static RepeatTests r = RepeatTests.with(new EmptyAction().fullFATOnly())
+//                    .andWith(FeatureReplacementAction.EE8_FEATURES().fullFATOnly())
+//                    .andWith(FeatureReplacementAction.EE9_FEATURES());
+    public static RepeatTests r = RepeatTests.with(new EmptyAction());
 
     public static LibertyServer getServer() {
         if (JakartaEE9Action.isActive()) {

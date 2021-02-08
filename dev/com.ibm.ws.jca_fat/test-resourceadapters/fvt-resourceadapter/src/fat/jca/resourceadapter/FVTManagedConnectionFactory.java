@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012,2020 IBM Corporation and others.
+ * Copyright (c) 2012,2021 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,8 @@ import javax.resource.spi.ResourceAdapter;
 import javax.resource.spi.ResourceAdapterAssociation;
 import javax.security.auth.Subject;
 import javax.sql.XAConnection;
+
+import com.ibm.websphere.j2c.ConnectionEvent;
 
 public class FVTManagedConnectionFactory implements ManagedConnectionFactory, ResourceAdapterAssociation {
     private static final long serialVersionUID = 7834485368743035738L;
@@ -116,12 +118,22 @@ public class FVTManagedConnectionFactory implements ManagedConnectionFactory, Re
     /** {@inheritDoc} */
     @Override
     public ManagedConnection matchManagedConnections(@SuppressWarnings("rawtypes") Set set, Subject subject, ConnectionRequestInfo cri) throws ResourceException {
+        System.out.println("Enter matchManagedConnections");
         for (Object o : set)
             if (o instanceof FVTManagedConnection) {
                 FVTManagedConnection m = (FVTManagedConnection) o;
-                if (match(m.cri, cri) && matchSubjects(m.subject, subject))
+                if (m.isInvalid()) {
+                    System.out.println("m is invalid in matchManagedConnections");
+                    FVTConnection conHandle = null;
+                    Exception failure = null;
+                    m.notify(ConnectionEvent.CONNECTION_ERROR_OCCURRED, conHandle, failure);
+                }
+                if (match(m.cri, cri) && matchSubjects(m.subject, subject)) {
+                    System.out.println("Returning m from matchManagedConnections");
                     return m;
+                }
             }
+        System.out.println("Exit matchManagedConnections");
         return null;
     }
 
