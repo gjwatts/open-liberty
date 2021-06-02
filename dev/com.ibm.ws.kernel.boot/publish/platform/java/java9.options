@@ -47,3 +47,5 @@ java.base/java.security=ALL-UNNAMED
 --add-opens
 java.base/java.net=ALL-UNNAMED
 
+### Java 9 JEPS 396
+--illegal-access=permit
