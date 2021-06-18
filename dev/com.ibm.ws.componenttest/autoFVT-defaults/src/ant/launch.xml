@@ -103,7 +103,7 @@
 		     illegal-access=permit to illegal-access=deny.  This causes many of our FATs that use reflection to fail.  
 		     This change sets up a gated property (illegal.access.permit) so that any builds that take place on Java 15+ use 
 		     illegal-access=permit, but older versions will be skipped --> 
-		<condition property="illegal.access.permit" value="--add-opens java.base/java.lang=ALL-UNNAMED">
+		<condition property="illegal.access.permit" value="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED">
 			<istrue value="${is.java15.orHigher}"/>
 		</condition>
 		<property name="illegal.access.permit" value=""/>
