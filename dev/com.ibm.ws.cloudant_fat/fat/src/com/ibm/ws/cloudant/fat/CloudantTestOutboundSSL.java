@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 IBM Corporation and others.
+ * Copyright (c) 2017, 2021 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,6 @@ public class CloudantTestOutboundSSL extends FATServletClient {
     @Server("com.ibm.ws.cloudant.fat.outboundSSL")
     public static LibertyServer server;
 
-    private static final String DB_NAME = "outboundssldb";
     public static final String JEE_APP = "cloudantfat";
     public static final String SERVLET_NAME = "CloudantTestServlet";
     // CWWKO0801E (SSLHandshakeErrorTracker - no cipher suites in common) : See defect 260787
@@ -51,9 +50,7 @@ public class CloudantTestOutboundSSL extends FATServletClient {
         server.addEnvVar("cloudant_port_secure", "" + cloudant.getMappedPort(CouchDBContainer.PORT_SECURE));
         server.addEnvVar("cloudant_username", cloudant.getUser());
         server.addEnvVar("cloudant_password", cloudant.getPassword());
-        server.addEnvVar("cloudant_databaseName", DB_NAME);
-
-        cloudant.createDb(DB_NAME);
+        server.addEnvVar("cloudant_databaseName", cloudant.getDatabaseName(CloudantTestOutboundSSL.class));
 
         // Create a normal Java EE application and export to server
         ShrinkHelper.defaultApp(server, JEE_APP, "cloudant.web");
@@ -66,7 +63,7 @@ public class CloudantTestOutboundSSL extends FATServletClient {
     }
 
     private void runTest() throws Exception {
-        runTest(server, JEE_APP + '/' + SERVLET_NAME, testName.getMethodName() + "&databaseName=" + DB_NAME);
+        runTest(server, JEE_APP + '/' + SERVLET_NAME, testName.getMethodName() + "&databaseName=" + cloudant.getDatabaseName(CloudantTestOutboundSSL.class));
     }
 
     /*

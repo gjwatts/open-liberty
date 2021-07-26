@@ -16,7 +16,6 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import componenttest.containers.ExternalTestServiceDockerClientStrategy;
-import componenttest.containers.SimpleLogConsumer;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -34,7 +33,10 @@ public class FATSuite {
     }
 
     @ClassRule
-    public static CouchDBContainer cloudant = new CouchDBContainer("gjwatts/couchdb-tls12:1.0")
-                    .withLogConsumer(new SimpleLogConsumer(FATSuite.class, "cloudant"));
+    public static CouchDBContainer cloudant = new CouchDBContainer()
+                    .withDatabaseName(CloudantDemoTest.class, "demodb", false)
+                    .withDatabaseName(CloudantModifyConfigTest.class, "cloudantmoddb", false)
+                    .withDatabaseName(CloudantTest.class, "cloudantdb", false)
+                    .withDatabaseName(CloudantTestOutboundSSL.class, "outboundssldb", true);
 
 }

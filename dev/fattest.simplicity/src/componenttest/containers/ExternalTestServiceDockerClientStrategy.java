@@ -68,13 +68,13 @@ public class ExternalTestServiceDockerClientStrategy extends DockerClientProvide
 
     /**
      * <pre>
-     * By default, Testcontainrs will cache the DockerClient strategy in <code>~/.testcontainers.properties</code>.
+     * By default, Testcontainers will cache the DockerClient strategy in <code>~/.testcontainers.properties</code>.
      *
-     * Calling this method in the FATSuite class is REQUIRED for any fat project that uses testconatiners.
+     * Calling this method in the FATSuite class is REQUIRED for any fat project that uses Testcontainers.
      * This is a safety measure to ensure that we run with the correct docker.client.stategy property
      * for each FATSuite run.
      *
-     * Example Useage:
+     * Example Usage:
      *
      * &#64;RunWith(Suite.class)
      * &#64;SuiteClasses({ FailoverTest.class })

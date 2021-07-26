@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 IBM Corporation and others.
+ * Copyright (c) 2017, 2021 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,6 @@ public class CloudantTest extends FATServletClient {
     @Server("com.ibm.ws.cloudant.fat")
     public static LibertyServer server;
 
-    private static final String DB_NAME = "cloudantdb";
     public static final String JEE_APP = "cloudantfat";
     public static final String SERVLET_NAME = "CloudantTestServlet";
     public static String[] expectedFailures = { "CWWKE0701E.*ResourceFactoryTrackerData",
@@ -49,9 +48,7 @@ public class CloudantTest extends FATServletClient {
         server.addEnvVar("cloudant_url_secure", cloudant.getURL(true));
         server.addEnvVar("cloudant_username", cloudant.getUser());
         server.addEnvVar("cloudant_password", cloudant.getPassword());
-        server.addEnvVar("cloudant_databaseName", DB_NAME);
-
-        cloudant.createDb(DB_NAME);
+        server.addEnvVar("cloudant_databaseName", cloudant.getDatabaseName(CloudantTest.class));
 
         ShrinkHelper.defaultApp(server, JEE_APP, "cloudant.web");
         server.startServer();
@@ -63,7 +60,7 @@ public class CloudantTest extends FATServletClient {
     }
 
     private void runTest() throws Exception {
-        runTest(server, JEE_APP + '/' + SERVLET_NAME, testName.getMethodName() + "&databaseName=" + DB_NAME);
+        runTest(server, JEE_APP + '/' + SERVLET_NAME, testName.getMethodName() + "&databaseName=" + cloudant.getDatabaseName(CloudantTest.class));
     }
 
     @Test

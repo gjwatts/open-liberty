@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2019 IBM Corporation and others.
+ * Copyright (c) 2017, 2021 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,8 +56,6 @@ public class CloudantModifyConfigTest extends FATServletClient {
 
     private static String[] cleanupList = EMPTY_RECYCLE_LIST;
 
-    private static String databaseName = "cloudantmoddb";
-
     private static ServerConfiguration originalConfig;
 
     @Server("com.ibm.ws.cloudant.fat.modifyconfig")
@@ -68,7 +66,7 @@ public class CloudantModifyConfigTest extends FATServletClient {
         server.addEnvVar("cloudant_url", cloudant.getURL(false));
         server.addEnvVar("cloudant_username", cloudant.getUser());
         server.addEnvVar("cloudant_password", cloudant.getPassword());
-        server.addEnvVar("cloudant_databaseName", databaseName);
+        server.addEnvVar("cloudant_databaseName", cloudant.getDatabaseName(CloudantModifyConfigTest.class));
 
         originalConfig = server.getServerConfiguration();
 
@@ -107,7 +105,7 @@ public class CloudantModifyConfigTest extends FATServletClient {
                         .append("&jndiName=")
                         .append(jndiName)
                         .append("&databaseName=")
-                        .append(databaseName);
+                        .append(cloudant.getDatabaseName(CloudantModifyConfigTest.class));
         for (String s : params)
             sb.append('&').append(s);
         runTest(server, APP + '/' + SERVLET_NAME, sb.toString());
