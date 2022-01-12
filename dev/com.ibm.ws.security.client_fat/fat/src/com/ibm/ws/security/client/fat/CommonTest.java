@@ -43,6 +43,7 @@ import com.meterware.httpunit.WebRequest;
 
 import componenttest.common.apiservices.Bootstrap;
 import componenttest.rules.repeater.JakartaEE9Action;
+import componenttest.topology.impl.JavaInfo;
 import componenttest.topology.impl.LibertyClient;
 import componenttest.topology.impl.LibertyClientFactory;
 import componenttest.topology.impl.LibertyFileManager;
@@ -181,7 +182,7 @@ public class CommonTest {
     /**
      * Sets up and runs a client. A client.xml file is expected to be present in
      * the client's root directory.
-     * 
+     *
      * @param testClientName
      * @param ignoreErrors
      * @throws Exception
@@ -216,7 +217,7 @@ public class CommonTest {
     /**
      * Sets up and runs a client. A client.xml file is expected to be present in
      * the client's root directory.
-     * 
+     *
      * @param testClientName
      * @throws Exception
      */
@@ -228,15 +229,15 @@ public class CommonTest {
     /**
      * Sets up and runs a client. A client.xml file is expected to be present in
      * the client's root directory.
-     * 
+     *
      * @param testClientName
      * @param clientxml
-     * @param pause the maximum wait time in seconds prior to invoke init() method of the ORB object.
-     *            This can be used in order to make sure that a SSL certificate is being genereated.
-     *            At the worst case, it took more than 20 seconds to generate. So putting 30 seconds.
-     *            When this value is set, the calc application will check whether key.jks file exists
-     *            in the default location for every two seconds, and if it's not there, wait up to specified wait time.
-     *            When it reaches the maximum wait time, the program resumes.
+     * @param pause          the maximum wait time in seconds prior to invoke init() method of the ORB object.
+     *                           This can be used in order to make sure that a SSL certificate is being genereated.
+     *                           At the worst case, it took more than 20 seconds to generate. So putting 30 seconds.
+     *                           When this value is set, the calc application will check whether key.jks file exists
+     *                           in the default location for every two seconds, and if it's not there, wait up to specified wait time.
+     *                           When it reaches the maximum wait time, the program resumes.
      * @param ignoreErrors
      * @throws Exception
      */
@@ -247,15 +248,15 @@ public class CommonTest {
     /**
      * Sets up and runs a client. A client.xml file is expected to be present in
      * the client's root directory.
-     * 
+     *
      * @param testClientName
      * @param clientxml
-     * @param pause the maximum wait time in seconds prior to invoke init() method of the ORB object.
-     *            This can be used in order to make sure that a SSL certificate is being genereated.
-     *            At the worst case, it took more than 20 seconds to genereate. So putting 30 seconds.
-     *            When this value is set, the calc application will check whether key.jks file exists
-     *            in the default location for every two seconds, and if it's not there, wait up to specified wait time.
-     *            When it reaches the maximum wait time, the program resumes.
+     * @param pause          the maximum wait time in seconds prior to invoke init() method of the ORB object.
+     *                           This can be used in order to make sure that a SSL certificate is being genereated.
+     *                           At the worst case, it took more than 20 seconds to genereate. So putting 30 seconds.
+     *                           When this value is set, the calc application will check whether key.jks file exists
+     *                           in the default location for every two seconds, and if it's not there, wait up to specified wait time.
+     *                           When it reaches the maximum wait time, the program resumes.
      * @param ignoreErrors
      * @throws Exception
      */
@@ -305,7 +306,7 @@ public class CommonTest {
     /**
      * Sets up and runs a client. A client.xml file is expected to be present in
      * the client's root directory.
-     * 
+     *
      * @param testClientName
      * @throws Exception
      */
@@ -332,7 +333,7 @@ public class CommonTest {
     /**
      * Sets up and runs a client. A client.xml file is expected to be present in
      * the client's root directory.
-     * 
+     *
      * @param testClientName
      * @param ignoreErrors
      * @throws Exception
@@ -375,7 +376,7 @@ public class CommonTest {
     /**
      * Sets up and runs a client, passing in the specified parameters as arguments to the client. A client.xml file is
      * expected to be present in the client's root directory.
-     * 
+     *
      * @param testClientName
      * @param parameters
      * @return
@@ -389,7 +390,7 @@ public class CommonTest {
      * Sets up and runs a client, passing in the specified parameters as arguments to the client. If {@code clientXml} is
      * not {@code null}, the client is configured to use the specified client configuration file from within the configs/
      * directory of the client. Otherwise, a client.xml file is expected to be present in the client's root directory.
-     * 
+     *
      * @param testClientName
      * @param clientXml
      * @param parameters
@@ -426,7 +427,7 @@ public class CommonTest {
      * Sets up and runs a client, passing in the specified parameters as arguments to the client. If {@code clientXml} is
      * not {@code null}, the client is configured to use the specified client configuration file from within the configs/
      * directory of the client. Otherwise, a client.xml file is expected to be present in the client's root directory.
-     * 
+     *
      * @param testClientName
      * @param clientXml
      * @param parameters
@@ -459,7 +460,7 @@ public class CommonTest {
     /**
      * Sets up and starts a server. A server.xml file is expected to be present
      * in the client's root directory.
-     * 
+     *
      * @param testServerName
      * @throws Exception
      */
@@ -643,6 +644,11 @@ public class CommonTest {
                         + configuredTrace;
         }
 
+        // If we are running on Java 18+, then we need to explicitly enable the security manager
+        if (JavaInfo.JAVA_VERSION >= 18 && !JVM_ARGS.contains("-Djava.security.manager=allow")) {
+            JVM_ARGS += " -Djava.security.manager=allow";
+        }
+
         envVars.setProperty("JVM_ARGS", JVM_ARGS);
 
         // This takes the custom console file name used for tests into
@@ -754,7 +760,7 @@ public class CommonTest {
 //
     /**
      * setup before running a test
-     * 
+     *
      * @throws Exception
      */
     @Before
@@ -769,7 +775,7 @@ public class CommonTest {
 
     /**
      * Clean up after running a test
-     * 
+     *
      * @throws Exception
      */
     @After
@@ -852,7 +858,7 @@ public class CommonTest {
     /**
      * Asserts that no System.err messages are contained in {@code output}. This is done by checking to see if there are
      * any lines in {@code output} that begin with {@code [err]}.
-     * 
+     *
      * @param output
      */
     public static void assertNoErrMessages(String output) {
@@ -867,7 +873,7 @@ public class CommonTest {
      * JakartaEE9 transform applications for a specific client.
      *
      * @param client
-     *            The client to transform the applications on.
+     *                   The client to transform the applications on.
      */
     public static void transformApps(LibertyClient client) {
         if (JakartaEE9Action.isActive()) {

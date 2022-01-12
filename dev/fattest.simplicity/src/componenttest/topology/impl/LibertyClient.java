@@ -683,6 +683,11 @@ public class LibertyClient {
             JVM_ARGS += " -Dcom.ibm.ws.logging.trace.specification=" + configuredTrace;
         }
 
+        // If we are running on Java 18+, then we need to explicitly enable the security manager
+        if (JavaInfo.JAVA_VERSION >= 18 && !JVM_ARGS.contains("-Djava.security.manager=allow")) {
+            JVM_ARGS += " -Djava.security.manager=allow";
+        }
+
         envVars.setProperty("JVM_ARGS", JVM_ARGS);
 
         // This takes the custom console file name used for tests into consideration

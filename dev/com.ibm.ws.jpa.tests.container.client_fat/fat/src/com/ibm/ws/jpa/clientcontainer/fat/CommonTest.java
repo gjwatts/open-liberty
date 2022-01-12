@@ -30,6 +30,7 @@ import com.ibm.websphere.simplicity.RemoteFile;
 import com.ibm.websphere.simplicity.log.Log;
 
 import componenttest.common.apiservices.Bootstrap;
+import componenttest.topology.impl.JavaInfo;
 import componenttest.topology.impl.LibertyClient;
 import componenttest.topology.impl.LibertyClientFactory;
 import componenttest.topology.impl.LibertyServer;
@@ -369,6 +370,11 @@ public class CommonTest {
 
             JVM_ARGS += " -Dcom.ibm.ws.logging.trace.specification="
                         + configuredTrace;
+        }
+
+        // If we are running on Java 18+, then we need to explicitly enable the security manager
+        if (JavaInfo.JAVA_VERSION >= 18 && !JVM_ARGS.contains("-Djava.security.manager=allow")) {
+            JVM_ARGS += " -Djava.security.manager=allow";
         }
 
         envVars.setProperty("JVM_ARGS", JVM_ARGS);
