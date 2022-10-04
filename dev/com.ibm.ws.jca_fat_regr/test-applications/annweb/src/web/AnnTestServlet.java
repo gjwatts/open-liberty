@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.naming.InitialContext;
 import javax.resource.cci.ConnectionFactory;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +36,7 @@ public class AnnTestServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         out.println(" ---> " + servletName + " is starting " + test + "<br>");
         System.out.println(" ---> " + servletName + " is starting test: " + test);
+        System.out.println(" ---> GJW was here");
 
         try {
             getClass().getMethod(test, HttpServletRequest.class, HttpServletResponse.class).invoke(this, request, response);
