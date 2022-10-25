@@ -36,6 +36,7 @@ public class FATSuite {
     static {
         // EE10 requires Java 11.  If we only specify EE10 for lite mode it will cause no tests to run which causes an error.
         // If we are running on Java 8 have EE9 be the lite mode test to run.
+        System.out.println("GJW-25-Oct-2022");
         if (JavaInfo.JAVA_VERSION >= 11) {
             repeat = RepeatTests.with(new EmptyAction().fullFATOnly())
                             .andWith(new JakartaEE9Action().fullFATOnly())
