@@ -52,6 +52,7 @@ public class Java19Test extends FATServletClient {
 
     @Test
     public void testJava19App() throws Exception {
+        System.out.println("GJW-25-Oct-2022");
         String appResponse = HttpUtils.getHttpResponseAsString(server, APP_NAME + '/');
         assertContains(appResponse, "<<< EXIT SUCCESSFUL");
     }
