@@ -65,6 +65,7 @@ public class PackageRunnableTest {
     private static final long DUMMY_MANIFEST_FILE_SIZE = 41;
     // Wait a few seconds longer than quiesce time
     private static final int STOP_RETRY_COUNT = 35;
+    public static final String osName = System.getProperty("os.name", "unknown");
 
     /*
      * return env as array and add WLP_JAR_EXTRACT_DIR=extractDirectory
@@ -310,7 +311,10 @@ public class PackageRunnableTest {
 
             assertTrue("Extract directory " + extractDirectory.getAbsolutePath() + " does not exist.", extractDirectory.exists());
 
-            String[] cmd = { "java", "-jar", runnableJar.getAbsolutePath() };
+            final String prefix = "os/400".equalsIgnoreCase(osName) ? "system \"QSH CMD('" : "";
+            final String suffix = "os/400".equalsIgnoreCase(osName) ? "')\"" : "";
+
+            String[] cmd = { prefix + "java", "-jar", runnableJar.getAbsolutePath() + suffix };
             Log.info(c, method, "Running command: " + Arrays.toString(cmd));
             ProcessBuilder processBuilder = new ProcessBuilder(cmd);
             processBuilder.redirectErrorStream(true);
