@@ -1,4 +1,5 @@
 package com.ibm.ws.kernel.boot;
+
 /*******************************************************************************
  * Copyright (c) 2019, 2020 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
@@ -100,6 +101,7 @@ public class ServerStartJavaEnvironmentVariablesTest {
             assertTrue("The variable " + OPENJ9_JAVA_OPTIONS + " should contain the provided value", openj9.contains(XSHARECLASSES_OPTION));
 
             String ibmOptions = getEnvironmentVariable(dumpFile, IBM_JAVA_OPTIONS);
+            Log.info(c, testName.getMethodName(), "ibmOptions: " + ibmOptions);
             assertNotNull("The variable " + IBM_JAVA_OPTIONS + " should be found", ibmOptions);
             assertTrue("The variable " + IBM_JAVA_OPTIONS + " should contain Xshareclasses", ibmOptions.contains(XSHARECLASSES_STRING));
             assertFalse("The variable " + IBM_JAVA_OPTIONS + " should not contain Xdump:what ", ibmOptions.contains(XDUMP_OPTION));
