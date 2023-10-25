@@ -37,6 +37,8 @@ import com.ibm.ws.logging.internal.NLSConstants;
 import com.ibm.ws.ras.instrument.internal.bci.AbstractRasClassAdapter;
 import com.ibm.ws.ras.instrument.internal.bci.LibertyTracingClassAdapter;
 
+import io.openliberty.asm.ASMHelper;
+
 /**
  * This class is responsible for instrumenting classes that have been
  * pre-processed during our build with entry / exit tracing. The hope
@@ -202,7 +204,7 @@ public class LibertyRuntimeTransformer implements ClassFileTransformer {
         if (isJDK8WithHotReplaceBug)
             return classFileVersion <= Opcodes.V1_7;
         else
-            return classFileVersion <= Opcodes.V11;
+            return classFileVersion <= ASMHelper.getMaximumJavaLevel();
     }
 
     /**
