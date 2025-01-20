@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2024 IBM Corporation and others.
+ * Copyright (c) 2013, 2025 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ import com.ibm.ws.kernel.boot.LaunchException;
 import com.ibm.ws.kernel.boot.Launcher;
 import com.ibm.ws.kernel.boot.ReturnCode;
 import com.ibm.ws.kernel.boot.security.WLPDynamicPolicy;
+import com.ibm.ws.kernel.boot.utils.JavaInfo;
 import com.ibm.ws.kernel.boot.utils.SequenceNumber;
 import com.ibm.ws.kernel.internal.classloader.BootstrapChildFirstJarClassloader;
 import com.ibm.ws.kernel.internal.classloader.BootstrapChildFirstURLClassloader;
@@ -305,7 +306,7 @@ public class KernelBootstrap {
             return serverLock.waitForStop();
         }
 
-        // Server did not propertly start (no delegate), so stop is fine.
+        // Server did not properly start (no delegate), so stop is fine.
         return ReturnCode.OK;
     }
 
@@ -438,7 +439,7 @@ public class KernelBootstrap {
      * Set Java 2 Security if enabled
      */
     public static void enableJava2SecurityIfSet(BootstrapConfig bootProps, List<URL> urlList) {
-        if (bootProps.get(BootstrapConstants.JAVA_2_SECURITY_PROPERTY) != null) {
+        if (bootProps.get(BootstrapConstants.JAVA_2_SECURITY_PROPERTY) != null && JavaInfo.majorVersion() < 24) {
 
             NameBasedLocalBundleRepository repo = new NameBasedLocalBundleRepository(bootProps.getInstallRoot());
             File bestMatchFile = repo.selectBundle("com.ibm.ws.org.eclipse.equinox.region",
@@ -493,7 +494,7 @@ public class KernelBootstrap {
         String bsConsoleFormat = bootProps.get("com.ibm.ws.logging.console.format");
         String envConsoleFormat = System.getenv("WLP_LOGGING_CONSOLE_FORMAT");
 
-        //boostrap format should take precedence
+        //bootstrap format should take precedence
         String consoleFormat = bsConsoleFormat != null ? bsConsoleFormat : envConsoleFormat;
 
         if (productDisplayName == null) {

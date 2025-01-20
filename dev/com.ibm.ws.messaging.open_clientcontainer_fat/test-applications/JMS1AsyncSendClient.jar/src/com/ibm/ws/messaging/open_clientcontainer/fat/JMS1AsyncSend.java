@@ -13,12 +13,17 @@
  */
 package com.ibm.ws.messaging.open_clientcontainer.fat;
 
-import java.util.Properties;
+import static javax.jms.DeliveryMode.NON_PERSISTENT;
+import static javax.jms.DeliveryMode.PERSISTENT;
+import static javax.jms.Session.AUTO_ACKNOWLEDGE;
+import static javax.naming.Context.PROVIDER_URL;
+
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Properties;
 
 import javax.jms.Connection;
-import javax.jms.DeliveryMode;
+import javax.jms.ConnectionFactory;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -29,12 +34,10 @@ import javax.jms.Queue;
 import javax.jms.QueueBrowser;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
-import javax.jms.ConnectionFactory;
 import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.InitialContext;
-import javax.naming.Context;
 
 public class JMS1AsyncSend extends ClientMain {
     public static void main(String[] args) {
@@ -69,7 +72,7 @@ public class JMS1AsyncSend extends ClientMain {
         Util.TRACE_ENTRY();
 
         Properties env = new Properties();
-        env.put(Context.PROVIDER_URL, "iiop://localhost:2809");
+        env.put(PROVIDER_URL, "iiop://localhost:2809");
         InitialContext jndi = new InitialContext(env);
         Util.CODEPATH();
         queueConnectionFactory_ = (QueueConnectionFactory) jndi.lookup("java:comp/env/jndi_JMS_BASE_QCF");
@@ -98,7 +101,7 @@ public class JMS1AsyncSend extends ClientMain {
     	Util.CODEPATH();
 
     	try (QueueConnection connection = queueConnectionFactory_.createQueueConnection();
-		     QueueSession session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE)) {
+		     QueueSession session = connection.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
     		
     		// Use a temporary Queue so that it is automatically cleaned up whne the Connection is closed.
     		Queue queue = session.createTemporaryQueue();
@@ -158,7 +161,7 @@ public class JMS1AsyncSend extends ClientMain {
 
     @ClientTest
     public void testJMS1ExceptionMessageThreshhold() throws JMSException, TestException {
-        try (QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        try (QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
             MessageProducer producer = session.createProducer(depthLimitedQueue_);
 
             BasicCompletionListener completionListener = new BasicCompletionListener();
@@ -185,7 +188,7 @@ public class JMS1AsyncSend extends ClientMain {
 	  Util.CODEPATH();
 
       try ( QueueConnection queueConnection = queueConnectionFactory_.createQueueConnection();
-    		QueueSession queueSession = queueConnection.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {  
+    		QueueSession queueSession = queueConnection.createQueueSession(false, AUTO_ACKNOWLEDGE)) {  
           
     	  Util.TRACE("Getting Test objects");
     	  
@@ -221,7 +224,7 @@ public class JMS1AsyncSend extends ClientMain {
     @ClientTest
     public void testJMS1MessageOrderingSingleProducer() throws JMSException, InterruptedException, TestException {
         
-        try (QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        try (QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
             MessageConsumer consumer = session.createConsumer(queueOne_);
             MessageProducer producer = session.createProducer(null);
 
@@ -231,7 +234,7 @@ public class JMS1AsyncSend extends ClientMain {
             for (int i = 0; i < messageOrderListener.getExpectedMessageCount(); i++) {
                 TextMessage sentMessage = session.createTextMessage(methodName()+" Sequence:"+i+" at "+new Date());
                 sentMessage.setIntProperty("Message_Order", i);
-                producer.send(queueOne_, sentMessage, DeliveryMode.PERSISTENT, 0, 10000, messageOrderListener);
+                producer.send(queueOne_, sentMessage, PERSISTENT, 0, 10000, messageOrderListener);
             }
             
             for (int i = 0; i < messageOrderListener.getExpectedMessageCount(); i++) {
@@ -258,7 +261,7 @@ public class JMS1AsyncSend extends ClientMain {
     @ClientTest
     public void testJMS1MessageOrderingMultipleProducers() throws JMSException, InterruptedException, TestException {
         
-        try (QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        try (QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
             MessageProducer producer[] = { session.createProducer(queueOne_), 
                                            session.createProducer(queueOne_), 
                                            session.createProducer(queueOne_),
@@ -313,10 +316,10 @@ public class JMS1AsyncSend extends ClientMain {
     @ClientTest
     public void testJMS1MessageOrderingMultipleSessions() throws JMSException, InterruptedException, TestException {
 
-        QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE);
-        QueueSession producerSessions[] = { queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE),
-                                            queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE), 
-                                            queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE) };
+        QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE);
+        QueueSession producerSessions[] = { queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE),
+                                            queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE), 
+                                            queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE) };
         try {
             MessageProducer producer[] = { producerSessions[0].createProducer(queueOne_), 
                                            producerSessions[1].createProducer(queueOne_),
@@ -331,7 +334,7 @@ public class JMS1AsyncSend extends ClientMain {
                 TextMessage sentMessage = session.createTextMessage(methodName() + " at " + new Date() + " Sequence:" + i);
                 sentMessage.setIntProperty("Session_Number", i % 3);
                 sentMessage.setIntProperty("Message_Order", i);
-                producer[i % 3].send(sentMessage, DeliveryMode.PERSISTENT, 0, 10000, completionListener);
+                producer[i % 3].send(sentMessage, PERSISTENT, 0, 10000, completionListener);
             }
 
             Util.TRACE(completionListener.formattedState());
@@ -367,7 +370,7 @@ public class JMS1AsyncSend extends ClientMain {
     public void testJMS1CloseSession() throws JMSException, InterruptedException, TestException {
 
         try (QueueConnection connection = queueConnectionFactory_.createQueueConnection()) {
-            QueueSession session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+            QueueSession session = connection.createQueueSession(false, AUTO_ACKNOWLEDGE);
             StringBuffer sentMessageText = new StringBuffer(methodName() + " at " + new Date());
             while (sentMessageText.length() < 13000)
                 sentMessageText.append("testJMS1CloseSession.");
@@ -397,7 +400,7 @@ public class JMS1AsyncSend extends ClientMain {
     public void testJMS1CloseConnection() throws JMSException, InterruptedException, TestException {
 
         try (QueueConnection connection = queueConnectionFactory_.createQueueConnection()) {
-            QueueSession session = connection.createQueueSession(false, Session.AUTO_ACKNOWLEDGE);
+            QueueSession session = connection.createQueueSession(false, AUTO_ACKNOWLEDGE);
             StringBuffer sentMessageText = new StringBuffer(methodName() + " at " + new Date());
             while (sentMessageText.length() < 13000)
                 sentMessageText.append("testJMS1CloseConnection.");
@@ -429,7 +432,7 @@ public class JMS1AsyncSend extends ClientMain {
     	Util.CODEPATH();
     	
         try ( QueueConnection queueConnection = queueConnectionFactory_.createQueueConnection();
-        	  QueueSession session = queueConnection.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        	  QueueSession session = queueConnection.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
         	
         	Util.TRACE("Getting Test objects");
             TextMessage sentMessage = session.createTextMessage(methodName() + " at " + new Date());
@@ -469,7 +472,7 @@ public class JMS1AsyncSend extends ClientMain {
     	Util.CODEPATH();
     	
         try (QueueConnection queueConnection = queueConnectionFactory_.createQueueConnection();
-        	 QueueSession session = queueConnection.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        	 QueueSession session = queueConnection.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
 
         	Util.TRACE("Creating test objects");
         	
@@ -504,7 +507,7 @@ public class JMS1AsyncSend extends ClientMain {
     	Util.CODEPATH();
 
         try (QueueConnection queueConnection = queueConnectionFactory_.createQueueConnection();
-        	 QueueSession session = queueConnection.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        	 QueueSession session = queueConnection.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
         	
         	Util.TRACE("Creating test objects");
         	
@@ -532,7 +535,7 @@ public class JMS1AsyncSend extends ClientMain {
             }
             try {
             	Util.LOG("Test no destination method 2");
-                producer.send(sentMessage, DeliveryMode.PERSISTENT, 0, 10000, completionListener);
+                producer.send(sentMessage, PERSISTENT, 0, 10000, completionListener);
                 throw new TestException("UnsupportedOperationException 2 not thrown");
             } catch (UnsupportedOperationException e) {
                 // Expected Exception.
@@ -540,7 +543,7 @@ public class JMS1AsyncSend extends ClientMain {
             }
             try {
             	Util.LOG("Test null destination method 2");
-                producer.send(null, sentMessage, DeliveryMode.PERSISTENT, 0, 10000, completionListener);
+                producer.send(null, sentMessage, PERSISTENT, 0, 10000, completionListener);
                 throw new TestException("InvalidDestinationException 2 not thrown");
             } catch (InvalidDestinationException e) {
                 // Expected Exception.
@@ -560,7 +563,7 @@ public class JMS1AsyncSend extends ClientMain {
   @ClientTest
     public void testJMS1CompletionListener() throws JMSException, InterruptedException, TestException {
 
-        try (QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        try (QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
             MessageProducer producer = session.createProducer(null);
             BasicCompletionListener completionListener = new BasicCompletionListener();
             for (int i = 0; i < 5; i++) {
@@ -632,7 +635,7 @@ public class JMS1AsyncSend extends ClientMain {
   @ClientTest
   public void testJMS1TransactionAndListener() throws Exception, JMSException, InterruptedException {
 
-      try (QueueSession session = queueConnection_.createQueueSession(true, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+      try (QueueSession session = queueConnection_.createQueueSession(true, AUTO_ACKNOWLEDGE)) {
           MessageProducer producer = session.createProducer(depthLimitedQueue_);
           TextMessage sentMessage = session.createTextMessage(methodName()+" at "+new Date());
           BasicCompletionListener completionListener = new BasicCompletionListener();
@@ -686,7 +689,7 @@ public class JMS1AsyncSend extends ClientMain {
     @ClientTest
     public void testJMS1NegativeTimeToLive() throws JMSException, InterruptedException, TestException {
         
-        try (QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        try (QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
             MessageProducer producer = session.createProducer(queueOne_);
             MessageConsumer consumer = session.createConsumer(queueOne_);
 
@@ -694,7 +697,7 @@ public class JMS1AsyncSend extends ClientMain {
             BasicCompletionListener completionListener = new BasicCompletionListener();
 
             try {
-                producer.send(sentMessage, DeliveryMode.NON_PERSISTENT, 0, -100, completionListener);
+                producer.send(sentMessage, NON_PERSISTENT, 0, -100, completionListener);
                 throw new TestException("Send with negative time to live succeeded.");
             } catch (JMSException e) {
                 // Expected Exception.
@@ -731,7 +734,7 @@ public class JMS1AsyncSend extends ClientMain {
     @ClientTest
     public void testJMS1Priority() throws JMSException, InterruptedException, TestException {
 
-        try (QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        try (QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
             MessageConsumer consumer = session.createConsumer(queueOne_);
             MessageProducer producer = session.createProducer(null);
 
@@ -743,7 +746,7 @@ public class JMS1AsyncSend extends ClientMain {
             long sequence = 0;
             for (int priority = 0; priority < 10; priority++) {
                 TextMessage sentMessage = session.createTextMessage(methodName()+" at "+new Date() +" Sequence:"+sequence++);
-                producer.send(queueOne_, sentMessage, DeliveryMode.PERSISTENT, priority, 10000, completionListener);
+                producer.send(queueOne_, sentMessage, PERSISTENT, priority, 10000, completionListener);
             }
 
             completionListener.waitFor(10, 0);
@@ -772,7 +775,7 @@ public class JMS1AsyncSend extends ClientMain {
     @ClientTest
     public void testJMS1NegativePriority() throws JMSException, InterruptedException, TestException {
 
-        try (QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        try (QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
             MessageProducer producer = session.createProducer(null);
 
             BasicCompletionListener completionListener = new BasicCompletionListener();
@@ -781,7 +784,7 @@ public class JMS1AsyncSend extends ClientMain {
             Util.CODEPATH();
 
             try {
-                producer.send(queueOne_, sentMessage, DeliveryMode.PERSISTENT, -2 /* priority */, 10000, completionListener);
+                producer.send(queueOne_, sentMessage, PERSISTENT, -2 /* priority */, 10000, completionListener);
                 throw new TestException("JMSException not thrown");
             } catch (JMSException e) {
                 // Expected Exception.
@@ -797,7 +800,7 @@ public class JMS1AsyncSend extends ClientMain {
   @ClientTest
   public void testJMS1DeliveryMode() throws JMSException, InterruptedException, TestException {
     
-        try (QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+        try (QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
             MessageProducer producer = session.createProducer(queueOne_);
             MessageConsumer consumer = session.createConsumer(queueOne_);
             BasicCompletionListener completionListener = new BasicCompletionListener();
@@ -805,14 +808,14 @@ public class JMS1AsyncSend extends ClientMain {
             // Good delivery modes, will send messages.
             try {
                 TextMessage sentMessage = session.createTextMessage(methodName() + " at " + new Date() + " DeliveryMode:NON_PERSISTENT");
-                producer.send(sentMessage, DeliveryMode.NON_PERSISTENT, 0, 100000, completionListener);
+                producer.send(sentMessage, NON_PERSISTENT, 0, 100000, completionListener);
             } catch (JMSException jmsException) {
                 throw new TestException("Unexpected exception", jmsException);
             }
 
             try {
                 TextMessage sentMessage = session.createTextMessage(methodName() + " at " + new Date() + " DeliveryMode:PERSISTENT");
-                producer.send(sentMessage, DeliveryMode.PERSISTENT, 0, 100000, completionListener);
+                producer.send(sentMessage, PERSISTENT, 0, 100000, completionListener);
             } catch (JMSException jmsException) {
                 throw new TestException("Unexpected exception", jmsException);
             }
@@ -842,7 +845,7 @@ public class JMS1AsyncSend extends ClientMain {
   @ClientTest
   public void testJMS1NullEmptyMessage() throws JMSException, InterruptedException, TestException {
 
-      try (QueueSession session = queueConnection_.createQueueSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+      try (QueueSession session = queueConnection_.createQueueSession(false, AUTO_ACKNOWLEDGE)) {
           MessageConsumer consumer = session.createConsumer(queueOne_);
           MessageProducer producer = session.createProducer(queueOne_);
           TextMessage sentMessage = session.createTextMessage("");
@@ -886,7 +889,7 @@ public class JMS1AsyncSend extends ClientMain {
       Util.TRACE_ENTRY(new Object[] {queue, messagePrefix, numberExpected});
 
       long numberCleared = 0;
-      try (Session session = connection.createSession(false, javax.jms.Session.AUTO_ACKNOWLEDGE)) {
+      try (Session session = connection.createSession(false, AUTO_ACKNOWLEDGE)) {
           MessageConsumer consumer = session.createConsumer(queue);
          
           for (TextMessage message = (TextMessage) consumer.receiveNoWait(); message != null; message = (TextMessage) consumer.receiveNoWait()) {
