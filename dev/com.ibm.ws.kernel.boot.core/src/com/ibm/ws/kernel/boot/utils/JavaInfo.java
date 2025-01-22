@@ -13,6 +13,7 @@ package com.ibm.ws.kernel.boot.utils;
  * A class used for identifying properties of a JDK
  */
 public class JavaInfo {
+
     private static JavaInfo instance;
 
     public static int JAVA_VERSION = majorVersion();

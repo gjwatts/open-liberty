@@ -458,7 +458,6 @@ public class KernelBootstrap {
             Policy wlpPolicy = new WLPDynamicPolicy(Policy.getPolicy(), urlList);
             Policy.setPolicy(wlpPolicy);
         }
-
     }
 
     /**
